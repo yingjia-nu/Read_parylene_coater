@@ -1,0 +1,5 @@
+Set the camera in the middle of the coater. Will fixed
+Crop out each controllers, make sure to include all the corners. It's ok to include a corner from the next controller
+Adjust the exposure time. Make sure all the digits are captured. Longer than the electronic flink time
+The exposure time can't be too long. After cropping the controller, check the average of its h and s channel.
+The h_ave and s_ave should be both > 70 (longer exposure, brighter image, lower value) to use the s channel.
