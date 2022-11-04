@@ -20,7 +20,7 @@ def find_reading_contours(cnt):
         (x, y, w, h) = cv2.boundingRect(c)
         if y < controller_height/3: # reading on top
             reading_cnts.append(c)
-
+    print(f"There are {len(reading_cnts)} digits")
     if len(reading_cnts) > 0:
         reading_cnts = contours.sort_contours(reading_cnts, method='left-to-right')[0]
     else:

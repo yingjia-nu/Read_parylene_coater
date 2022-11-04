@@ -9,7 +9,7 @@ from Read_digits import convert_cnt_to_numbers
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-path = 'C:/Users/yjias/Desktop/parylene_1p7.jpg'
+path = 'C:/Users/yjias/Desktop/parylene_1p.jpg'
 
 # Read image, resize it, and extract h and s channels
 image = cv2.imread(path)
@@ -18,14 +18,14 @@ hsv_color = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 h = hsv_color[:, :, 0]
 s = hsv_color[:, :, 1]
 # check if the exposure time is too long
-if np.mean(h) < 70 or np.mean(s) < 70:
+if np.mean(h) < 50 or np.mean(s) < 50:
     print('The exposure time is too long. '
           f'The average of h channel is {np.mean(h)}.'
           f'The average of s channel is {np.mean(s)}.')
     sys.exit()
 
-# default use channel h and threshold 80 to do contour
-ret, thresh = cv2.threshold(h, 80, 255, cv2.THRESH_BINARY)
+# default use channel s and threshold 80 to do contour
+ret, thresh = cv2.threshold(s, 80, 255, cv2.THRESH_BINARY) # need to choose s or h channel
 
 controller_cnt = find_controller(thresh)
 adjusted_controller_image = adjust_skew(controller_cnt, thresh)

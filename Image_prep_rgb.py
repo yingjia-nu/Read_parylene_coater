@@ -44,30 +44,47 @@ def find_controller(thresh):
     #cv2.waitKey(0)
     cnts, ret = cv2.findContours(edge_improved, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-    if cv2.contourArea(cnts[0]) > cv2.contourArea(cnts[1]) * 10:
-        return cnts[0]
-    else:
-        print('Image crop error: make sure all the controller corners are included')
-        sys.exit()
+    return cnts[0]
 
 
-def adjust_skew(cnt, thresh_image):
+
+def adjust_skew(cnt, image):
     peri = cv2.arcLength(cnt, True)
     approx = cv2.approxPolyDP(cnt, 0.025 * peri, True)
     if len(approx) != 4:
         print("skew adjust failed. Didn't find the four corners")
         sys.exit()
-    corners = np.zeros((4,2), dtype='float32')
+    corners = np.zeros((4, 2), dtype='float32')
     for i in range(4):
         corners[i] = approx[i][0]
 
-    warped = four_point_transform(corners, thresh_image)
+    warped = four_point_transform(corners, image)
     #cv2.imshow("Warped", warped)
     #cv2.waitKey(0)
-    corrected_img = warped[10:-10, 10:-10]
+    corrected_img = warped[5:-5, 5:-5, :]
     corrected_img = cv2.resize(corrected_img, (300, 300), interpolation=cv2.INTER_NEAREST)
     return corrected_img
 
+def remove_background(img):
+    red = img[:, :, 2]
+    green = img[:, :, 1]
+    blue = img[:, :, 0]
+    red_blue_diff = np.mean(red) - np.mean(blue)
+    if red_blue_diff >= 15:
+        th = 200
+    elif red_blue_diff <= 5:
+        th = 150
+    else:
+        th = 175
+    print(f"th = {th}")
+    ret, thresh_red = cv2.threshold(red, th, 255, cv2.THRESH_BINARY)
+    ret, thresh_green = cv2.threshold(green, th, 255, cv2.THRESH_BINARY)
+    ret, thresh_blue = cv2.threshold(blue, th, 255, cv2.THRESH_BINARY)
+
+    thresh = thresh_red - thresh_green
+    #cv2.imshow('tresh', thresh)
+    #cv2.waitKey(0)
+    return thresh
 
 #if __name__ == "__main__":
 
