@@ -1,17 +1,49 @@
 import sys
 import cv2
 import numpy as np
+import math
 
 def order_points(pts):
-    rect = np.zeros((4, 2), dtype='float32')
-    s = pts.sum(axis=1) # x+y for each point
-    rect[0] = pts[np.argmin(s)] # top-left corner has the smallest sum
-    rect[2] = pts[np.argmax(s)]  # bottom right corner has the largest sum
+    # initialzie a list of coordinates that will be ordered such that the first entry in the list is the top-left,
+    # the second entry is the top-right, the third is the bottom-right, and the fourth is the bottom-left
+    rect = np.zeros((4, 2), dtype="float32")
+    # the top-left point will have the smallest sum, whereas
+    # the bottom-right point will hav e the largest sum
+    s = pts.sum(axis=1)
+    tl = pts[np.argmin(s)]
+    br = pts[np.argmax(s)]
     pts_2 = np.delete(pts, [np.argmin(s), np.argmax(s)], axis=0)
+    # now, compute the difference between the points, the
+    # top-right point will have the smallest difference,
+    # whereas the bottom-left will have the largest difference
+    diff = np.diff(pts_2, axis=1)
+    tr = pts_2[np.argmin(diff)]
+    bl = pts_2[np.argmax(diff)]
+    # check if distance (tr-br)<(tr-tl). For rectangle shape of parylene panel, height < width
+    width = math.dist(tr, tl)
+    height = math.dist(tr, br)
+    # if width > height, the above ordering assumption holds
+    if width > height:
+        rect[0] = tl
+        rect[1] = tr
+        rect[2] = br
+        rect[3] = bl
+    # otherwise, need to re-order the points. First determine which direction to rotate
+    else:
+        # look at the slope of the width edge. slope + or - depends on Edge_x * edge_y + or -
+        edge = tr - br
+        # re-order the points
+        if edge[0] * edge[1] > 0:
+            rect[0] = tr
+            rect[1] = br
+            rect[2] = bl
+            rect[3] = tl
+        else:
+            rect[0] = bl
+            rect[1] = tl
+            rect[2] = tr
+            rect[3] = br
 
-    diff = np.diff(pts_2, axis=1) # y-x for each point
-    rect[1] = pts_2[np.argmin(diff)] # top-right corner has smallest y and biggest x
-    rect[3] = pts_2[np.argmax(diff)] # bottom left corner has largest y and smallest x
     return rect
 
 def four_point_transform(pts, image):

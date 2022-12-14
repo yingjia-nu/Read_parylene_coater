@@ -32,7 +32,14 @@ def convert_cnt_to_numbers(cnts, image, model):
             dig_cnt = cnts[i]
             dig_28 = input_prep(dig_cnt, image)
             pred = model.predict(dig_28)
+            if pred.max() < 0.75:
+                print('not sure about this digit') # replace with warning and save image
             read_digits.append(pred.argmax())
+            reading = 0
+            for i in range(len(read_digits)):
+                reading += read_digits[len(read_digits) - i - 1] * (10 ** i)
+    else:
+         reading = -100
 
-    return read_digits
+    return reading
 
