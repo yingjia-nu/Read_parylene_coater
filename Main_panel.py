@@ -11,7 +11,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # start a while True loop here. Take a picture, wait 1min, save the picture
-path = 'C:/Users/yjias/Desktop/far.jpg'
+path = 'C:/Users/yjias/Desktop/1.jpg'
 image = cv2.imread(path)
 # find the contour of the blue panel, offset -50 for white cleanroom
 
@@ -23,7 +23,7 @@ if corner_check(panel_cnt):
     adjusted_panel_image = adjust_skew(panel_cnt, image, edge_size=20)
     (x, y, d) = adjusted_panel_image.shape
     if y < 450:
-        print("camera is too far away")
+        print("camera is too far away") # add to alarm log, save image, and break out loop
     else:
         # find the controller contours
         controller_cnts = find_controller(adjusted_panel_image, offset=50)[:4]
@@ -51,8 +51,11 @@ if corner_check(panel_cnt):
                     print(f"Adjust the capture angle for controller {i+1}") # replace with
                     # warning "adjust angle" and save image
 
-else: # if blocked, wait 5 min, counter +1, if counter<10, continue, if counter = 10, break
-    print('Panel is blocked or camera is too close')# save the image to another location
+else: # can't find panel, wait 5 min, counter +1, if counter<10, continue, if counter = 10,
+    # add alarm log "blocked or too close", save image and break out loop
+    print('Panel is blocked or camera is too close')
+
+# when break out the loop, print("Adjust camera position")
 
 
 
